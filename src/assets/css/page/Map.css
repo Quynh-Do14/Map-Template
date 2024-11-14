@@ -1,0 +1,124 @@
+.map-container {
+    position: relative;
+}
+
+.map-container .map-controls-left {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.map-container .map-controls-right {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.map-container .map-button {
+    background-color: #004466;
+    color: #fff;
+    border: none;
+    padding: 12px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.map-container .map-button:hover {
+    background-color: #555;
+}
+
+.map-container .map-button i {
+    font-size: 16px;
+}
+
+.map-container .map-layers-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #004466;
+    color: #fff;
+    width: 250px;
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    font-family: Arial, sans-serif;
+}
+
+.map-container .map-layers-panel h3 {
+    margin: 0;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.map-container .map-layers-panel h4 {
+    font-size: 16px;
+}
+
+.map-container .map-layers-panel hr {
+    border: none;
+    border-top: 1px solid #555;
+    margin: 10px 0;
+}
+
+.map-container .layer-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.map-container .layer-item input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.map-container .color-indicator {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+    border-radius: 50%;
+}
+
+.map-container .close-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.map-container .map-button input[type="file"] {
+    display: none;
+}
+.map-container .map-button label {
+    
+}
+.modal .form-group {
+    margin-bottom: 15px;
+}
+
+.modal .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.modal .form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 14px;
+}

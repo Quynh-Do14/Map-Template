@@ -1,10 +1,20 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import MainLayout from '../infrastructure/Layout/Client-Layout'
 import "../assets/css/page/Map.css"
 import ChartBar from './components/ChartBar';
+import "mapbox-gl/dist/mapbox-gl.css";
+import mapboxgl from "mapbox-gl";
+
+mapboxgl.accessToken =
+    "pk.eyJ1IjoibnRkMTAxMDIwMDAiLCJhIjoiY2tvbzJ4anl1MDZjMzJwbzNpcnA5NXZpcCJ9.dePfFDv0RlCLnWoDq1zHlw";
+
+
 const MapPage = () => {
-    const [isOpenLayer, setIsOpenLayer] = useState<boolean>(false);
-    const [isOpenDashboard, setIsOpenDashboard] = useState<boolean>(false);
+    const _map = useRef(null);
+
+    const [isOpenLayer, setIsOpenLayer] = useState(false);
+    const [isOpenDashboard, setIsOpenDashboard] = useState(false);
+    const [map, setMap] = useState({});
 
     const onOpenLayer = () => {
         setIsOpenLayer(!isOpenLayer);
@@ -13,6 +23,22 @@ const MapPage = () => {
     const onOpenDashboard = () => {
         setIsOpenDashboard(!isOpenDashboard);
     }
+
+    const fetchData = () => {
+        let map = new mapboxgl.Map({
+            container: _map.current,
+            zoom: 10,
+            center: [107.236898, 21.241870],
+            style: "mapbox://styles/mapbox/streets-v12",
+        });
+        setMap(map)
+    }
+
+    useEffect(() => {
+        fetchData()
+    }, [])
+
+
     return (
         <MainLayout>
             <div className='map-container'>
@@ -76,7 +102,7 @@ const MapPage = () => {
                     <ChartBar onOpenDashboard={onOpenDashboard} />
                 }
 
-                <div className="hero" style={{ backgroundImage: 'url(https://image.bnews.vn/MediaUpload/Org/2024/03/13/googlemaps-bnews-vn-20240313162046.png)' }}></div>
+                <div className="hero" ref={_map}></div>
             </div>
             <div className="modal fade" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog">

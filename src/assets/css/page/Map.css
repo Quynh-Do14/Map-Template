@@ -4,6 +4,7 @@
 
 .map-container .map-controls-left {
     position: absolute;
+    z-index: 1;
     top: 10px;
     left: 10px;
     display: flex;
@@ -12,6 +13,7 @@
 
 .map-container .map-controls-right {
     position: absolute;
+    z-index: 1;
     top: 10px;
     right: 10px;
     display: flex;
@@ -42,6 +44,7 @@
 
 .map-container .map-layers-panel {
     position: absolute;
+    z-index: 1;
     top: 10px;
     right: 10px;
     background-color: #004466;
@@ -71,6 +74,7 @@
 
 .map-container .map-layers-panel .close-btn {
     position: absolute;
+    z-index: 1;
     top: 5px;
     right: 5px;
     background: none;
@@ -92,6 +96,7 @@
 
 .map-container .map-dashboard {
     position: absolute;
+    z-index: 1;
     top: 10px;
     left: 10px;
     background-color: #ffffff;
@@ -108,6 +113,7 @@
 
 .map-container .map-dashboard .close-btn {
     position: absolute;
+    z-index: 1;
     top: 5px;
     right: 5px;
     background: none;

@@ -1,16 +1,23 @@
 import React, { useState } from 'react'
 import MainLayout from '../infrastructure/Layout/Client-Layout'
 import "../assets/css/page/Map.css"
+import ChartBar from './components/ChartBar';
 const MapPage = () => {
     const [isOpenLayer, setIsOpenLayer] = useState<boolean>(false);
+    const [isOpenDashboard, setIsOpenDashboard] = useState<boolean>(false);
+
     const onOpenLayer = () => {
         setIsOpenLayer(!isOpenLayer);
+    }
+
+    const onOpenDashboard = () => {
+        setIsOpenDashboard(!isOpenDashboard);
     }
     return (
         <MainLayout>
             <div className='map-container'>
                 <div className='map-controls-left'>
-                    <button className="map-button">
+                    <button className="map-button" onClick={onOpenDashboard}>
                         <i className="fa fa-search"></i>
                     </button>
                     <button className="map-button" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -62,6 +69,11 @@ const MapPage = () => {
                         </div>
 
                     </div>
+                }
+                {
+                    isOpenDashboard
+                    &&
+                    <ChartBar onOpenDashboard={onOpenDashboard} />
                 }
 
                 <div className="hero" style={{ backgroundImage: 'url(https://image.bnews.vn/MediaUpload/Org/2024/03/13/googlemaps-bnews-vn-20240313162046.png)' }}></div>

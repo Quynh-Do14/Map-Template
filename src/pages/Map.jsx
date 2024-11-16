@@ -15,6 +15,8 @@ const MapPage = () => {
     const [isOpenLayer, setIsOpenLayer] = useState(false);
     const [isOpenDashboard, setIsOpenDashboard] = useState(false);
     const [map, setMap] = useState({});
+    const [anhVeTinh, setAnhVeTinh] = useState({});
+
 
     const onOpenLayer = () => {
         setIsOpenLayer(!isOpenLayer);
@@ -31,13 +33,90 @@ const MapPage = () => {
             center: [107.236898, 21.241870],
             style: "mapbox://styles/mapbox/streets-v12",
         });
-        setMap(map)
+        setMap(map);
+        map.on('load', () => {
+            map.addSource("ranh_gioi_huyen", {
+                type: "geojson",
+                data: `http://localhost:3100/dataGeoJson?tenbang=ranh_gioi_huyen`,
+            });
+
+            map.addLayer({
+                id: "ranh_gioi_huyen",
+                type: "line",
+                source: "ranh_gioi_huyen",
+                layout: {},
+                paint: {
+                    "line-color": "#094174",
+                    "line-width": 2,
+                },
+            });
+            // Load an image from an external URL.
+            map.addSource("ranh_gioi_tinh", {
+                type: "geojson",
+                data: `http://localhost:3100/dataGeoJson?tenbang=ranh_gioi_tinh`,
+            });
+
+            map.addLayer({
+                id: "ranh_gioi_tinh",
+                type: "line",
+                source: "ranh_gioi_tinh",
+                layout: {},
+                paint: {
+                    "line-color": "#FE7524",
+                    "line-width": 4,
+                },
+            });
+        })
     }
 
     useEffect(() => {
         fetchData()
     }, [])
 
+    const xemAnh = () => {
+        fetch('http://localhost:3100/sentinel2?time_start1=2024-05-01&time_end1=2024-06-30&time_start2=2024-06-01&time_end2=2024-08-30')
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data);
+                setAnhVeTinh(data);
+                if (map.getLayer("img1")) {
+                    map.removeLayer("img1");
+                }
+                if (map.getSource("img1")) {
+                    map.removeSource("img1");
+                }
+                map.addSource("img1", {
+                    type: "raster",
+                    tiles: [data.img1],
+                });
+                map.addLayer(
+                    {
+                        id: "img1",
+                        type: "raster",
+                        source: "img1",
+
+                    },
+                );
+            })
+            .catch((error) => {
+                console.log('xemAnh ', error);
+            });
+    }
+
+    const btDiaDiemDuLich = (e) => {
+        document.getElementById(e.target.value).checked = e.target.checked;
+        map.setLayoutProperty(
+        
+            e.target.value,
+            "visibility",
+            e.target.checked ? "visible" : "none"
+        );
+    };
 
     return (
         <MainLayout>
@@ -94,6 +173,18 @@ const MapPage = () => {
                             <span>DKS_06_09_2022_L8</span>
                         </div>
 
+                        {
+                            anhVeTinh.img1 && <div className="layer-item">
+                                <input type="checkbox" name={`img1`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                    id={`img1`}
+                                    value={`img1`} />
+                                <span className="color-indicator"></span>
+                                <span>img1</span>
+                            </div>
+
+                        }
+
                     </div>
                 }
                 {
@@ -123,7 +214,7 @@ const MapPage = () => {
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                            <button type="button" className="btn btn-primary">Xem</button>
+                            <button type="button" onClick={xemAnh} className="btn btn-primary" data-bs-dismiss="modal">Xem</button>
                         </div>
                     </div>
                 </div>

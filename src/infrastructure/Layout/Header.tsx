@@ -14,8 +14,8 @@ const HeaderClient = () => {
 
             <header className="site-navbar js-sticky-header site-navbar-target" role="banner">
                 <div className="container-fluid header-section">
-                    <div className="header-title">CƠ SỞ DỮ LIỆU CHẤT LƯỢNG NƯỚC CÁC HỒ HÀ NỘI</div>
-                    <div className="header-info">Thuộc đề tài: Ứng dụng công nghệ viễn thám và trí tuệ nhân tạo nghiên cứu, giám sát chất lượng nước hồ nội địa, thí điểm trên địa bàn Hà Nội</div>
+                    <div className="header-title">PHÁT HIỆN RÁC THẢI TỈNH QUẢNG NINH</div>
+                    <div className="header-info">Thuộc đề tài: phát hiện rác thải tỉnh quảng ninh</div>
                 </div>
             </header>
 

@@ -1,3 +1,7 @@
 * {
   font-family: Arial, sans-serif;
 }
+
+.ant-spin.ant-spin-spinning {
+  color: #004466;
+}

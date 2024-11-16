@@ -4,20 +4,26 @@ import "../assets/css/page/Map.css"
 import ChartBar from './components/ChartBar';
 import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
+import { FullPageLoading } from '../infrastructure/common/loading';
 
 mapboxgl.accessToken =
     "pk.eyJ1IjoibnRkMTAxMDIwMDAiLCJhIjoiY2tvbzJ4anl1MDZjMzJwbzNpcnA5NXZpcCJ9.dePfFDv0RlCLnWoDq1zHlw";
 
 
 const MapPage = () => {
+    const baseURL = process.env.REACT_APP_BASE_URL;
     const _map = useRef(null);
+    const [loading, setLoading] = useState(false);
 
     const [isOpenLayer, setIsOpenLayer] = useState(false);
     const [isOpenDashboard, setIsOpenDashboard] = useState(false);
     const [map, setMap] = useState({});
     const [anhVeTinh, setAnhVeTinh] = useState({});
+    const [startDate1, setStartDate1] = useState("");
+    const [endDate1, setEndDate1] = useState("");
 
-
+    const [startDate2, setStartDate2] = useState("");
+    const [endDate2, setEndDate2] = useState("");
     const onOpenLayer = () => {
         setIsOpenLayer(!isOpenLayer);
     }
@@ -27,6 +33,7 @@ const MapPage = () => {
     }
 
     const fetchData = () => {
+        setLoading(true);
         let map = new mapboxgl.Map({
             container: _map.current,
             zoom: 10,
@@ -34,10 +41,11 @@ const MapPage = () => {
             style: "mapbox://styles/mapbox/streets-v12",
         });
         setMap(map);
+        setLoading(false);
         map.on('load', () => {
             map.addSource("ranh_gioi_huyen", {
                 type: "geojson",
-                data: `http://localhost:3100/dataGeoJson?tenbang=ranh_gioi_huyen`,
+                data: `${baseURL}/dataGeoJson?tenbang=ranh_gioi_huyen`,
             });
 
             map.addLayer({
@@ -53,7 +61,7 @@ const MapPage = () => {
             // Load an image from an external URL.
             map.addSource("ranh_gioi_tinh", {
                 type: "geojson",
-                data: `http://localhost:3100/dataGeoJson?tenbang=ranh_gioi_tinh`,
+                data: `${baseURL}/dataGeoJson?tenbang=ranh_gioi_tinh`,
             });
 
             map.addLayer({
@@ -74,7 +82,9 @@ const MapPage = () => {
     }, [])
 
     const xemAnh = () => {
-        fetch('http://localhost:3100/sentinel2?time_start1=2024-05-01&time_end1=2024-06-30&time_start2=2024-06-01&time_end2=2024-08-30')
+        setLoading(true);
+        fetch(`${baseURL}/sentinel2?time_start1=${startDate1}&time_end1=${endDate1}&time_start2=${startDate2}&time_end2=${endDate2}`)
+            // fetch(`http://103.130.212.145:23106/sentinel2?time_start1=2024-05-01&time_end1=2024-06-30&time_start2=2024-06-01&time_end2=2024-08-28`)
             .then((response) => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -83,7 +93,9 @@ const MapPage = () => {
             })
             .then((data) => {
                 console.log(data);
+                setLoading(false);
                 setAnhVeTinh(data);
+                ///img1
                 if (map.getLayer("img1")) {
                     map.removeLayer("img1");
                 }
@@ -102,8 +114,143 @@ const MapPage = () => {
 
                     },
                 );
+                ///img2
+                if (map.getLayer("img2")) {
+                    map.removeLayer("img2");
+                }
+                if (map.getSource("img2")) {
+                    map.removeSource("img2");
+                }
+                map.addSource("img2", {
+                    type: "raster",
+                    tiles: [data.img2],
+                });
+                map.addLayer(
+                    {
+                        id: "img2",
+                        type: "raster",
+                        source: "img2",
+
+                    },
+                );
+                ///ndviImageBeforeURL
+                if (map.getLayer("ndviImageBeforeURL")) {
+                    map.removeLayer("ndviImageBeforeURL");
+                }
+                if (map.getSource("ndviImageBeforeURL")) {
+                    map.removeSource("ndviImageBeforeURL");
+                }
+                map.addSource("ndviImageBeforeURL", {
+                    type: "raster",
+                    tiles: [data.ndviImageBeforeURL],
+                });
+                map.addLayer(
+                    {
+                        id: "ndviImageBeforeURL",
+                        type: "raster",
+                        source: "ndviImageBeforeURL",
+
+                    },
+                );
+                ///ndviImageAfterURL
+                if (map.getLayer("ndviImageAfterURL")) {
+                    map.removeLayer("ndviImageAfterURL");
+                }
+                if (map.getSource("ndviImageAfterURL")) {
+                    map.removeSource("ndviImageAfterURL");
+                }
+                map.addSource("ndviImageAfterURL", {
+                    type: "raster",
+                    tiles: [data.ndviImageAfterURL],
+                });
+                map.addLayer(
+                    {
+                        id: "ndviImageAfterURL",
+                        type: "raster",
+                        source: "ndviImageAfterURL",
+
+                    },
+                );
+                ///fdiImageBeforeURL
+                if (map.getLayer("fdiImageBeforeURL")) {
+                    map.removeLayer("fdiImageBeforeURL");
+                }
+                if (map.getSource("fdiImageBeforeURL")) {
+                    map.removeSource("fdiImageBeforeURL");
+                }
+                map.addSource("fdiImageBeforeURL", {
+                    type: "raster",
+                    tiles: [data.fdiImageBeforeURL],
+                });
+                map.addLayer(
+                    {
+                        id: "fdiImageBeforeURL",
+                        type: "raster",
+                        source: "fdiImageBeforeURL",
+
+                    },
+                );
+                /// fdiImageAfterURL
+                if (map.getLayer("fdiImageAfterURL")) {
+                    map.removeLayer("fdiImageAfterURL");
+                }
+                if (map.getSource("fdiImageAfterURL")) {
+                    map.removeSource("fdiImageAfterURL");
+                }
+                map.addSource("fdiImageAfterURL", {
+                    type: "raster",
+                    tiles: [data.fdiImageAfterURL],
+                });
+                map.addLayer(
+                    {
+                        id: "fdiImageAfterURL",
+                        type: "raster",
+                        source: "fdiImageAfterURL",
+
+                    },
+                );
+                /// debrisBeforeURL
+                if (map.getLayer("debrisBeforeURL")) {
+                    map.removeLayer("debrisBeforeURL");
+                }
+                if (map.getSource("debrisBeforeURL")) {
+                    map.removeSource("debrisBeforeURL");
+                }
+                map.addSource("debrisBeforeURL", {
+                    type: "raster",
+                    tiles: [data.debrisBeforeURL],
+                });
+                map.addLayer(
+                    {
+                        id: "debrisBeforeURL",
+                        type: "raster",
+                        source: "debrisBeforeURL",
+
+                    },
+                );
+                /// debrisAfterURL
+                if (map.getLayer("debrisAfterURL")) {
+                    map.removeLayer("debrisAfterURL");
+                }
+                if (map.getSource("debrisAfterURL")) {
+                    map.removeSource("debrisAfterURL");
+                }
+                map.addSource("debrisAfterURL", {
+                    type: "raster",
+                    tiles: [data.debrisAfterURL],
+                });
+                map.addLayer(
+                    {
+                        id: "debrisAfterURL",
+                        type: "raster",
+                        source: "debrisAfterURL",
+
+                    },
+                );
+
             })
             .catch((error) => {
+                setLoading(false);
                 console.log('xemAnh ', error);
             });
     }
@@ -111,7 +258,7 @@ const MapPage = () => {
     const btDiaDiemDuLich = (e) => {
         document.getElementById(e.target.value).checked = e.target.checked;
         map.setLayoutProperty(
-        
+
             e.target.value,
             "visibility",
             e.target.checked ? "visible" : "none"
@@ -123,10 +270,10 @@ const MapPage = () => {
             <div className='map-container'>
                 <div className='map-controls-left'>
                     <button className="map-button" onClick={onOpenDashboard}>
-                        <i className="fa fa-search"></i>
+                        <i className="fa fa-area-chart" aria-hidden="true"></i>
                     </button>
                     <button className="map-button" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <i className="fa fa-bars"></i>
+                        <i className="fa fa-search"></i>
                     </button>
                     <label htmlFor="upload-multi" className="map-button">
                         <input type="file" name="" id="upload-multi" multiple />
@@ -160,19 +307,7 @@ const MapPage = () => {
                             <span className="color-indicator"></span>
                             <span>Điểm mới thêm</span>
                         </div>
-                        <h4>Điểm khảo sát Sentinel 2</h4>
-                        <div className="layer-item">
-                            <input type="checkbox" />
-                            <span className="color-indicator"></span>
-                            <span>DKS_04_11_2022</span>
-                        </div>
-                        <h4>Điểm khảo sát Landsat 8</h4>
-                        <div className="layer-item">
-                            <input type="checkbox" />
-                            <span className="color-indicator"></span>
-                            <span>DKS_06_09_2022_L8</span>
-                        </div>
-
+                        <h4>Sentinel</h4>
                         {
                             anhVeTinh.img1 && <div className="layer-item">
                                 <input type="checkbox" name={`img1`} defaultChecked={true} onClick={btDiaDiemDuLich}
@@ -184,7 +319,78 @@ const MapPage = () => {
                             </div>
 
                         }
+                        {
+                            anhVeTinh.img2 && <div className="layer-item">
+                                <input type="checkbox" name={`img2`} defaultChecked={true} onClick={btDiaDiemDuLich}
 
+                                    id={`img2`}
+                                    value={`img2`} />
+                                <span className="color-indicator"></span>
+                                <span>img2</span>
+                            </div>
+                        }
+                        {
+                            anhVeTinh.ndviImageBeforeURL && <div className="layer-item">
+                                <input type="checkbox" name={`ndviImageBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                    id={`ndviImageBeforeURL`}
+                                    value={`ndviImageBeforeURL`} />
+                                <span className="color-indicator"></span>
+                                <span>ndviImageBefore</span>
+                            </div>
+
+                        }
+                        {
+                            anhVeTinh.ndviImageAfterURL && <div className="layer-item">
+                                <input type="checkbox" name={`ndviImageAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                    id={`ndviImageAfterURL`}
+                                    value={`ndviImageAfterURL`} />
+                                <span className="color-indicator"></span>
+                                <span>ndviImageAfter</span>
+                            </div>
+                        }
+
+                        {
+                            anhVeTinh.fdiImageAfterURL && <div className="layer-item">
+                                <input type="checkbox" name={`fdiImageAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                    id={`fdiImageAfterURL`}
+                                    value={`fdiImageAfterURL`} />
+                                <span className="color-indicator"></span>
+                                <span>fdiImageAfter</span>
+                            </div>
+                        }
+                        {
+                            anhVeTinh.fdiImageBeforeURL && <div className="layer-item">
+                                <input type="checkbox" name={`fdiImageBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                    id={`fdiImageBeforeURL`}
+                                    value={`fdiImageBeforeURL`} />
+                                <span className="color-indicator"></span>
+                                <span>fdiImageBefore</span>
+                            </div>
+                        }
+                        {
+                            anhVeTinh.debrisBeforeURL && <div className="layer-item">
+                                <input type="checkbox" name={`debrisBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                    id={`debrisBeforeURL`}
+                                    value={`debrisBeforeURL`} />
+                                <span className="color-indicator"></span>
+                                <span>debrisBefore</span>
+                            </div>
+                        }
+                        {
+                            anhVeTinh.debrisAfterURL && <div className="layer-item">
+                                <input type="checkbox" name={`debrisAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                    id={`debrisAfterURL`}
+                                    value={`debrisAfterURL`} />
+                                <span className="color-indicator"></span>
+                                <span>debrisAfter</span>
+                            </div>
+                        }
                     </div>
                 }
                 {
@@ -205,21 +411,37 @@ const MapPage = () => {
                         <div className="modal-body">
                             <div className="form-group">
                                 <label htmlFor="start-date">Ngày bắt đầu</label>
-                                <input type="date" id="start-date" className="form-control" />
+                                <input type="date" id="start-date" className="form-control"
+                                    onChange={(e) => (setStartDate1(e.target.value))}
+                                />
                             </div>
                             <div className="form-group">
                                 <label htmlFor="end-date">Ngày kết thúc</label>
-                                <input type="date" id="end-date" className="form-control" />
+                                <input type="date" id="end-date" className="form-control"
+                                    onChange={(e) => (setEndDate1(e.target.value))}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="start-date">Ngày bắt đầu</label>
+                                <input type="date" id="start-date" className="form-control"
+                                    onChange={(e) => (setStartDate2(e.target.value))}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="end-date">Ngày kết thúc</label>
+                                <input type="date" id="end-date" className="form-control"
+                                    onChange={(e) => (setEndDate2(e.target.value))}
+                                />
                             </div>
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                            <button type="button" onClick={xemAnh} className="btn btn-primary" data-bs-dismiss="modal">Xem</button>
+                            <button type="button" onClick={xemAnh} className="btn btn-primary btn-primary-color" data-bs-dismiss="modal">Xem</button>
                         </div>
                     </div>
                 </div>
             </div>
-
+            <FullPageLoading isLoading={loading} />
         </MainLayout>
     )
 }

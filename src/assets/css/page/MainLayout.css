@@ -3,6 +3,7 @@
     flex-direction: column;
     font-family: 'Mulish', sans-serif;
     overflow: hidden;
+    height: 100vh;
 }
 
 .main-layout-client .content-layout-client {

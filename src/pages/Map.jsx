@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import MainLayout from '../infrastructure/Layout/Client-Layout'
 import "../assets/css/page/Map.css"
-import ChartBar from './components/ChartBar';
 import "mapbox-gl/dist/mapbox-gl.css";
 import mapboxgl from "mapbox-gl";
 import { FullPageLoading } from '../infrastructure/common/loading';
+import ModalChartBar from './components/ModalChartBar';
 
 mapboxgl.accessToken =
     "pk.eyJ1IjoibnRkMTAxMDIwMDAiLCJhIjoiY2tvbzJ4anl1MDZjMzJwbzNpcnA5NXZpcCJ9.dePfFDv0RlCLnWoDq1zHlw";
@@ -12,6 +12,8 @@ mapboxgl.accessToken =
 
 const MapPage = () => {
     const baseURL = process.env.REACT_APP_BASE_URL;
+    const aiURL = process.env.REACT_APP_AI_URL;
+
     const _map = useRef(null);
     const [loading, setLoading] = useState(false);
 
@@ -21,6 +23,7 @@ const MapPage = () => {
     const [anhVeTinh, setAnhVeTinh] = useState({});
     const [startDate1, setStartDate1] = useState("");
     const [endDate1, setEndDate1] = useState("");
+    const [dataChart, setDataChart] = useState([]);
 
     const [startDate2, setStartDate2] = useState("");
     const [endDate2, setEndDate2] = useState("");
@@ -33,6 +36,8 @@ const MapPage = () => {
     }
 
     const fetchData = () => {
+        console.log('ádasdas');
+
         setLoading(true);
         let map = new mapboxgl.Map({
             container: _map.current,
@@ -112,7 +117,7 @@ const MapPage = () => {
                         type: "raster",
                         source: "img1",
 
-                    },
+                    }, 'ranh_gioi_huyen'
                 );
                 ///img2
                 if (map.getLayer("img2")) {
@@ -132,6 +137,7 @@ const MapPage = () => {
                         source: "img2",
 
                     },
+                    'ranh_gioi_huyen'
                 );
                 ///ndviImageBeforeURL
                 if (map.getLayer("ndviImageBeforeURL")) {
@@ -150,7 +156,7 @@ const MapPage = () => {
                         type: "raster",
                         source: "ndviImageBeforeURL",
 
-                    },
+                    }, 'ranh_gioi_huyen'
                 );
                 ///ndviImageAfterURL
                 if (map.getLayer("ndviImageAfterURL")) {
@@ -169,7 +175,7 @@ const MapPage = () => {
                         type: "raster",
                         source: "ndviImageAfterURL",
 
-                    },
+                    }, 'ranh_gioi_huyen'
                 );
                 ///fdiImageBeforeURL
                 if (map.getLayer("fdiImageBeforeURL")) {
@@ -188,7 +194,7 @@ const MapPage = () => {
                         type: "raster",
                         source: "fdiImageBeforeURL",
 
-                    },
+                    }, 'ranh_gioi_huyen'
                 );
                 /// fdiImageAfterURL
                 if (map.getLayer("fdiImageAfterURL")) {
@@ -207,7 +213,7 @@ const MapPage = () => {
                         type: "raster",
                         source: "fdiImageAfterURL",
 
-                    },
+                    }, 'ranh_gioi_huyen'
                 );
                 /// debrisBeforeURL
                 if (map.getLayer("debrisBeforeURL")) {
@@ -226,7 +232,7 @@ const MapPage = () => {
                         type: "raster",
                         source: "debrisBeforeURL",
 
-                    },
+                    }, 'ranh_gioi_huyen'
                 );
                 /// debrisAfterURL
                 if (map.getLayer("debrisAfterURL")) {
@@ -245,7 +251,7 @@ const MapPage = () => {
                         type: "raster",
                         source: "debrisAfterURL",
 
-                    },
+                    }, 'ranh_gioi_huyen'
                 );
 
             })
@@ -265,6 +271,33 @@ const MapPage = () => {
         );
     };
 
+    const uploadImageAsync = async (file) => {
+        console.log(file.target.files);
+        const files = file.target.files;
+        console.log("files", files);
+
+        const formData = new FormData(); // Tạo form data để gửi file
+        for (let i = 0; i < files?.length; i++) {
+            formData.append("image", files[i]); // Thêm từng file vào FormData
+        }
+
+        setLoading(true);
+        await fetch(`${aiURL}/api/predict`, {
+            method: "POST",
+            body: formData
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data);
+
+                // setDataChart(data)
+            })
+    }
     return (
         <MainLayout>
             <div className='map-container'>
@@ -276,7 +309,9 @@ const MapPage = () => {
                         <i className="fa fa-search"></i>
                     </button>
                     <label htmlFor="upload-multi" className="map-button">
-                        <input type="file" name="" id="upload-multi" multiple />
+                        <input type="file" name="" id="upload-multi"
+                            multiple
+                            onChange={uploadImageAsync} />
                         <i className="fa fa-cloud-upload"></i>
                     </label>
                 </div>
@@ -288,7 +323,6 @@ const MapPage = () => {
                             </path>
                         </svg>
                     </button>
-                    <button className="map-button"><i className="fa fa-square-o"></i></button>
                 </div>
                 {
                     isOpenLayer
@@ -296,107 +330,104 @@ const MapPage = () => {
                     <div className="map-layers-panel">
                         <button className="close-btn" onClick={onOpenLayer}>&times;</button>
                         <h3>Các lớp bản đồ</h3>
-                        <div className="layer-item">
-                            <input type="checkbox" checked />
-                            <span className="color-indicator"></span>
-                            <span>Ranh giới hồ</span>
+                        <div style={{
+                            paddingLeft: 16
+                        }}>
+                            <div className="layer-item">
+                                <input type="checkbox" checked />
+                                <span className="color-indicator"></span>
+                                <span>Ranh giới hồ</span>
+                            </div>
+                            {/* <h4>Sentinel 2</h4> */}
+                            {
+                                anhVeTinh.img1 && <div className="layer-item">
+                                    <input type="checkbox" name={`img1`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`img1`}
+                                        value={`img1`} />
+                                    <span className="color-indicator"></span>
+                                    <span>img1</span>
+                                </div>
+                            }
+                            {
+                                anhVeTinh.img2 && <div className="layer-item">
+                                    <input type="checkbox" name={`img2`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`img2`}
+                                        value={`img2`} />
+                                    <span className="color-indicator"></span>
+                                    <span>img2</span>
+                                </div>
+                            }
+                            {
+                                anhVeTinh.ndviImageBeforeURL && <div className="layer-item">
+                                    <input type="checkbox" name={`ndviImageBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`ndviImageBeforeURL`}
+                                        value={`ndviImageBeforeURL`} />
+                                    <span className="color-indicator"></span>
+                                    <span>ndviImageBefore</span>
+                                </div>
+
+                            }
+                            {
+                                anhVeTinh.ndviImageAfterURL && <div className="layer-item">
+                                    <input type="checkbox" name={`ndviImageAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`ndviImageAfterURL`}
+                                        value={`ndviImageAfterURL`} />
+                                    <span className="color-indicator"></span>
+                                    <span>ndviImageAfter</span>
+                                </div>
+                            }
+
+                            {
+                                anhVeTinh.fdiImageAfterURL && <div className="layer-item">
+                                    <input type="checkbox" name={`fdiImageAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`fdiImageAfterURL`}
+                                        value={`fdiImageAfterURL`} />
+                                    <span className="color-indicator"></span>
+                                    <span>fdiImageAfter</span>
+                                </div>
+                            }
+                            {
+                                anhVeTinh.fdiImageBeforeURL && <div className="layer-item">
+                                    <input type="checkbox" name={`fdiImageBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`fdiImageBeforeURL`}
+                                        value={`fdiImageBeforeURL`} />
+                                    <span className="color-indicator"></span>
+                                    <span>fdiImageBefore</span>
+                                </div>
+                            }
+                            {
+                                anhVeTinh.debrisBeforeURL && <div className="layer-item">
+                                    <input type="checkbox" name={`debrisBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`debrisBeforeURL`}
+                                        value={`debrisBeforeURL`} />
+                                    <span className="color-indicator"></span>
+                                    <span>debrisBefore</span>
+                                </div>
+                            }
+                            {
+                                anhVeTinh.debrisAfterURL && <div className="layer-item">
+                                    <input type="checkbox" name={`debrisAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`debrisAfterURL`}
+                                        value={`debrisAfterURL`} />
+                                    <span className="color-indicator"></span>
+                                    <span>debrisAfter</span>
+                                </div>
+                            }
                         </div>
-                        <h4>Điểm quan trắc</h4>
-                        <div className="layer-item">
-                            <input type="checkbox" checked />
-                            <span className="color-indicator"></span>
-                            <span>Điểm mới thêm</span>
-                        </div>
-                        <h4>Sentinel</h4>
-                        {
-                            anhVeTinh.img1 && <div className="layer-item">
-                                <input type="checkbox" name={`img1`} defaultChecked={true} onClick={btDiaDiemDuLich}
-
-                                    id={`img1`}
-                                    value={`img1`} />
-                                <span className="color-indicator"></span>
-                                <span>img1</span>
-                            </div>
-
-                        }
-                        {
-                            anhVeTinh.img2 && <div className="layer-item">
-                                <input type="checkbox" name={`img2`} defaultChecked={true} onClick={btDiaDiemDuLich}
-
-                                    id={`img2`}
-                                    value={`img2`} />
-                                <span className="color-indicator"></span>
-                                <span>img2</span>
-                            </div>
-                        }
-                        {
-                            anhVeTinh.ndviImageBeforeURL && <div className="layer-item">
-                                <input type="checkbox" name={`ndviImageBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
-
-                                    id={`ndviImageBeforeURL`}
-                                    value={`ndviImageBeforeURL`} />
-                                <span className="color-indicator"></span>
-                                <span>ndviImageBefore</span>
-                            </div>
-
-                        }
-                        {
-                            anhVeTinh.ndviImageAfterURL && <div className="layer-item">
-                                <input type="checkbox" name={`ndviImageAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
-
-                                    id={`ndviImageAfterURL`}
-                                    value={`ndviImageAfterURL`} />
-                                <span className="color-indicator"></span>
-                                <span>ndviImageAfter</span>
-                            </div>
-                        }
-
-                        {
-                            anhVeTinh.fdiImageAfterURL && <div className="layer-item">
-                                <input type="checkbox" name={`fdiImageAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
-
-                                    id={`fdiImageAfterURL`}
-                                    value={`fdiImageAfterURL`} />
-                                <span className="color-indicator"></span>
-                                <span>fdiImageAfter</span>
-                            </div>
-                        }
-                        {
-                            anhVeTinh.fdiImageBeforeURL && <div className="layer-item">
-                                <input type="checkbox" name={`fdiImageBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
-
-                                    id={`fdiImageBeforeURL`}
-                                    value={`fdiImageBeforeURL`} />
-                                <span className="color-indicator"></span>
-                                <span>fdiImageBefore</span>
-                            </div>
-                        }
-                        {
-                            anhVeTinh.debrisBeforeURL && <div className="layer-item">
-                                <input type="checkbox" name={`debrisBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
-
-                                    id={`debrisBeforeURL`}
-                                    value={`debrisBeforeURL`} />
-                                <span className="color-indicator"></span>
-                                <span>debrisBefore</span>
-                            </div>
-                        }
-                        {
-                            anhVeTinh.debrisAfterURL && <div className="layer-item">
-                                <input type="checkbox" name={`debrisAfterURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
-
-                                    id={`debrisAfterURL`}
-                                    value={`debrisAfterURL`} />
-                                <span className="color-indicator"></span>
-                                <span>debrisAfter</span>
-                            </div>
-                        }
                     </div>
                 }
                 {
                     isOpenDashboard
                     &&
-                    <ChartBar onOpenDashboard={onOpenDashboard} />
+                    <ModalChartBar onOpenDashboard={onOpenDashboard} />
                 }
 
                 <div className="hero" ref={_map}></div>

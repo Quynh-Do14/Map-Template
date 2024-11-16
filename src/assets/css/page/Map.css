@@ -101,7 +101,7 @@
     left: 10px;
     background-color: #ffffff;
     color: #fff;
-    width: 1000px;
+    width: 800px;
     max-width: 1000px;
     min-height: 200px;
     height: 70vh;
@@ -109,6 +109,15 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
     padding: 10px;
     font-family: Arial, sans-serif;
+    overflow: auto;
+}
+
+.map-container .map-dashboard .content {
+    padding-bottom: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .map-container .map-dashboard .close-btn {

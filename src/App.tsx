@@ -10,6 +10,8 @@ const App = () => {
     <BrowserRouter>
       <Routes>
         <Route path={"Map"} element={<MapPage />} />
+        <Route path={"/"} element={<MapPage />} />
+
       </Routes>
     </BrowserRouter>
   )

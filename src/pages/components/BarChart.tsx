@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -16,23 +16,25 @@ import "../../assets/css/page/Map.css"
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 type Props = {
-    data?: ChartData<'bar'>;
-    options?: ChartOptions<'bar'>;
-    onOpenDashboard: () => void
+    label: string;
+    dataLabel: string[];
+    dataAccurate: number[]
 }
 
 const ChartBar = (props: Props) => {
-    const { data, options, onOpenDashboard } = props
-    // Default data and options for the chart
+    const { label, dataLabel, dataAccurate } = props
+
     const defaultData: ChartData<'bar'> = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+        labels: dataLabel,
         datasets: [
             {
-                label: 'Sales',
-                data: [12, 19, 3, 5, 2, 3],
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                label: label,
+                data: dataAccurate,
+                backgroundColor: '#004466',
+                borderColor: '#004466',
                 borderWidth: 1,
+                minBarLength: 10,
+                maxBarThickness: 40,
             },
         ],
     };
@@ -43,10 +45,10 @@ const ChartBar = (props: Props) => {
             legend: {
                 position: 'top',
             },
-            title: {
-                display: true,
-                text: 'Monthly Sales Data',
-            },
+            // title: {
+            //     display: true,
+            //     text: title,
+            // },
         },
         scales: {
             y: {
@@ -56,10 +58,7 @@ const ChartBar = (props: Props) => {
     };
 
     return (
-        <div className="map-dashboard">
-            <button className="close-btn" onClick={onOpenDashboard}>&times;</button>
-            <Bar data={data || defaultData} options={options || defaultOptions} />
-        </div>
+        <Bar data={defaultData} options={defaultOptions} />
     )
 };
 export default ChartBar;

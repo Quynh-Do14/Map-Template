@@ -24,6 +24,9 @@ const MapPage = () => {
     const [startDate1, setStartDate1] = useState("");
     const [endDate1, setEndDate1] = useState("");
     const [dataChart, setDataChart] = useState([]);
+    const [dataFile, setDataFile] = useState({});
+    const [bound, setBound] = useState('');
+    const [imgRac, setImgRac] = useState('');
 
     const [startDate2, setStartDate2] = useState("");
     const [endDate2, setEndDate2] = useState("");
@@ -36,12 +39,10 @@ const MapPage = () => {
     }
 
     const fetchData = () => {
-        console.log('ádasdas');
-
         setLoading(true);
         let map = new mapboxgl.Map({
             container: _map.current,
-            zoom: 10,
+            zoom: 8.5,
             center: [107.236898, 21.241870],
             style: "mapbox://styles/mapbox/streets-v12",
         });
@@ -264,21 +265,21 @@ const MapPage = () => {
     const btDiaDiemDuLich = (e) => {
         document.getElementById(e.target.value).checked = e.target.checked;
         map.setLayoutProperty(
-
             e.target.value,
             "visibility",
             e.target.checked ? "visible" : "none"
         );
     };
 
-    const uploadImageAsync = async (file) => {
-        console.log(file.target.files);
-        const files = file.target.files;
-        console.log("files", files);
+    const onChangeFile = (file) => {
+        setDataFile(file.target);
+    }
 
-        const formData = new FormData(); // Tạo form data để gửi file
+    const uploadImageAsync = async () => {
+        const files = dataFile.files;
+        const formData = new FormData();
         for (let i = 0; i < files?.length; i++) {
-            formData.append("image", files[i]); // Thêm từng file vào FormData
+            formData.append("image", files[i], dataFile.value);
         }
 
         setLoading(true);
@@ -293,27 +294,63 @@ const MapPage = () => {
                 return response.json();
             })
             .then((data) => {
-                console.log(data);
+                var dt = [...dataChart];
+                dt.push(data.data);
+                setDataChart(dt);
+                if (map.getLayer("racthai")) {
+                    map.removeLayer("racthai");
+                }
+                if (map.getSource("racthai")) {
+                    map.removeSource("racthai");
+                }
+                setImgRac('http://52.195.232.28:8000/' + dt[0].file_path)
+                map.addSource('racthai', {
+                    'type': 'image',
+                    'url': 'http://52.195.232.28:8000/' + dt[0].file_path,
+                    'coordinates': JSON.parse(bound)
+                });
+                map.addLayer({
+                    id: 'racthai',
+                    'type': 'raster',
+                    'source': 'racthai',
+                    'paint': {
+                        'raster-fade-duration': 0
+                    }
+                });
+                map.fitBounds([JSON.parse(bound)[3], JSON.parse(bound)[1]], {
+                    padding: 40
+                });
+                setLoading(false);
+            }).catch((error) => {
+                setLoading(false);
 
-                // setDataChart(data)
-            })
+                console.log('uploadImageAsync ', error);
+            });
     }
     return (
         <MainLayout>
             <div className='map-container'>
                 <div className='map-controls-left'>
-                    <button className="map-button" onClick={onOpenDashboard}>
-                        <i className="fa fa-area-chart" aria-hidden="true"></i>
-                    </button>
+
                     <button className="map-button" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <i className="fa fa-search"></i>
+                        <i className="fa fa-picture-o" aria-hidden="true"></i>
                     </button>
-                    <label htmlFor="upload-multi" className="map-button">
+                    <button className="map-button" data-bs-toggle="modal" data-bs-target="#exampleModalUpload">
+                        <i className="fa fa-cloud-upload"></i>
+                    </button>
+
+                    {/* <label htmlFor="upload-multi" className="map-button">
                         <input type="file" name="" id="upload-multi"
                             multiple
                             onChange={uploadImageAsync} />
                         <i className="fa fa-cloud-upload"></i>
-                    </label>
+                    </label> */}
+                    {
+                        dataChart.length > 0 && <button className="map-button" onClick={onOpenDashboard}>
+                            <i className="fa fa-area-chart" aria-hidden="true"></i>
+                        </button>
+                    }
+
                 </div>
 
                 <div className='map-controls-right'>
@@ -333,20 +370,74 @@ const MapPage = () => {
                         <div style={{
                             paddingLeft: 16
                         }}>
+
                             <div className="layer-item">
-                                <input type="checkbox" checked />
-                                <span className="color-indicator"></span>
-                                <span>Ranh giới hồ</span>
+                                <input type="checkbox" name={`ranh_gioi_tinh`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                    id={`ranh_gioi_tinh`}
+                                    value={`ranh_gioi_tinh`} />
+                                <div
+                                    style={{
+                                        width: 25,
+                                        height: 25,
+                                        border: "2px solid #FE7524",
+                                        marginRight: 8,
+                                    }}
+                                ></div>
+                                <span>Ranh giới tỉnh</span>
                             </div>
-                            {/* <h4>Sentinel 2</h4> */}
+                            <div className="layer-item">
+                                <input type="checkbox" name={`ranh_gioi_huyen`} defaultChecked={true} onClick={btDiaDiemDuLich}
+                                    id={`ranh_gioi_huyen`}
+                                    value={`ranh_gioi_huyen`} />
+                                <div
+                                    style={{
+                                        width: 25,
+                                        height: 25,
+                                        border: "2px solid #ffff",
+                                        marginRight: 8,
+                                    }}
+                                ></div>
+                                <span>Ranh giới huyện</span>
+                            </div>
+                            {
+                                imgRac.length > 0 && <div className="layer-item">
+                                    <input type="checkbox" name={`racthai`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`racthai`}
+                                        value={`racthai`} />
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/11359/11359438.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>Ảnh rác thải</span>
+                                </div>
+                            }
                             {
                                 anhVeTinh.img1 && <div className="layer-item">
                                     <input type="checkbox" name={`img1`} defaultChecked={true} onClick={btDiaDiemDuLich}
 
                                         id={`img1`}
                                         value={`img1`} />
-                                    <span className="color-indicator"></span>
-                                    <span>img1</span>
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/3419/3419993.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>Ảnh vệ tinh trước</span>
                                 </div>
                             }
                             {
@@ -355,8 +446,18 @@ const MapPage = () => {
 
                                         id={`img2`}
                                         value={`img2`} />
-                                    <span className="color-indicator"></span>
-                                    <span>img2</span>
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/3419/3419993.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>Ảnh vệ tinh sau</span>
                                 </div>
                             }
                             {
@@ -365,8 +466,18 @@ const MapPage = () => {
 
                                         id={`ndviImageBeforeURL`}
                                         value={`ndviImageBeforeURL`} />
-                                    <span className="color-indicator"></span>
-                                    <span>ndviImageBefore</span>
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/3419/3419993.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>NDVI ảnh trước</span>
                                 </div>
 
                             }
@@ -376,8 +487,39 @@ const MapPage = () => {
 
                                         id={`ndviImageAfterURL`}
                                         value={`ndviImageAfterURL`} />
-                                    <span className="color-indicator"></span>
-                                    <span>ndviImageAfter</span>
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/3419/3419993.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>NDVI ảnh sau</span>
+                                </div>
+                            }
+
+                            {
+                                anhVeTinh.fdiImageBeforeURL && <div className="layer-item">
+                                    <input type="checkbox" name={`fdiImageBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
+
+                                        id={`fdiImageBeforeURL`}
+                                        value={`fdiImageBeforeURL`} />
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/3419/3419993.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>FDI ảnh trước</span>
                                 </div>
                             }
 
@@ -387,28 +529,39 @@ const MapPage = () => {
 
                                         id={`fdiImageAfterURL`}
                                         value={`fdiImageAfterURL`} />
-                                    <span className="color-indicator"></span>
-                                    <span>fdiImageAfter</span>
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/3419/3419993.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>FDI ảnh sau</span>
                                 </div>
                             }
-                            {
-                                anhVeTinh.fdiImageBeforeURL && <div className="layer-item">
-                                    <input type="checkbox" name={`fdiImageBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
 
-                                        id={`fdiImageBeforeURL`}
-                                        value={`fdiImageBeforeURL`} />
-                                    <span className="color-indicator"></span>
-                                    <span>fdiImageBefore</span>
-                                </div>
-                            }
                             {
                                 anhVeTinh.debrisBeforeURL && <div className="layer-item">
                                     <input type="checkbox" name={`debrisBeforeURL`} defaultChecked={true} onClick={btDiaDiemDuLich}
 
                                         id={`debrisBeforeURL`}
                                         value={`debrisBeforeURL`} />
-                                    <span className="color-indicator"></span>
-                                    <span>debrisBefore</span>
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/3419/3419993.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>Debris ảnh trước</span>
                                 </div>
                             }
                             {
@@ -417,53 +570,70 @@ const MapPage = () => {
 
                                         id={`debrisAfterURL`}
                                         value={`debrisAfterURL`} />
-                                    <span className="color-indicator"></span>
-                                    <span>debrisAfter</span>
+                                    <img
+                                        style={{
+                                            width: 25,
+                                            height: 25,
+                                            marginRight: 8,
+                                        }}
+                                        src={
+                                            "https://cdn-icons-png.flaticon.com/512/3419/3419993.png"
+                                        }
+                                        alt=""
+                                    />
+                                    <span>Debris ảnh sau</span>
                                 </div>
                             }
+
                         </div>
                     </div>
                 }
                 {
                     isOpenDashboard
                     &&
-                    <ModalChartBar onOpenDashboard={onOpenDashboard} />
+                    <ModalChartBar onOpenDashboard={onOpenDashboard} dataChart={dataChart} />
                 }
 
                 <div className="hero" ref={_map}></div>
             </div>
+            {/* search */}
             <div className="modal fade" id="exampleModal" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div className="modal-dialog">
                     <div className="modal-content">
                         <div className="modal-header">
-                            <h1 className="modal-title fs-5" id="exampleModalLabel">TimeLine</h1>
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Ảnh vệ tinh</h1>
                             <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div className="modal-body">
-                            <div className="form-group">
-                                <label htmlFor="start-date">Ngày bắt đầu</label>
-                                <input type="date" id="start-date" className="form-control"
-                                    onChange={(e) => (setStartDate1(e.target.value))}
-                                />
+                            <div className='row '>
+                                <div className="form-group col-6">
+                                    <label htmlFor="start-date">Ngày bắt đầu ảnh trước</label>
+                                    <input type="date" id="start-date" className="form-control"
+                                        onChange={(e) => (setStartDate1(e.target.value))}
+                                    />
+                                </div>
+                                <div className="form-group col-6">
+                                    <label htmlFor="end-date">Ngày kết thúc ảnh trước</label>
+                                    <input type="date" id="end-date" className="form-control"
+                                        onChange={(e) => (setEndDate1(e.target.value))}
+                                    />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="end-date">Ngày kết thúc</label>
-                                <input type="date" id="end-date" className="form-control"
-                                    onChange={(e) => (setEndDate1(e.target.value))}
-                                />
+                            <div className='row '>
+                                <div className="form-group col-6">
+                                    <label htmlFor="start-date">Ngày bắt đầu ảnh sau</label>
+                                    <input type="date" id="start-date" className="form-control"
+                                        onChange={(e) => (setStartDate2(e.target.value))}
+                                    />
+                                </div>
+                                <div className="form-group col-6">
+                                    <label htmlFor="end-date">Ngày kết thúc ảnh sau</label>
+                                    <input type="date" id="end-date" className="form-control"
+                                        onChange={(e) => (setEndDate2(e.target.value))}
+                                    />
+                                </div>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="start-date">Ngày bắt đầu</label>
-                                <input type="date" id="start-date" className="form-control"
-                                    onChange={(e) => (setStartDate2(e.target.value))}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="end-date">Ngày kết thúc</label>
-                                <input type="date" id="end-date" className="form-control"
-                                    onChange={(e) => (setEndDate2(e.target.value))}
-                                />
-                            </div>
+
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -472,6 +642,39 @@ const MapPage = () => {
                     </div>
                 </div>
             </div>
+            {/* search */}
+
+            {/* upload */}
+            <div className="modal fade" id="exampleModalUpload" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Rác thải</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="form-group">
+                                <label htmlFor="bound">Nhập BOUND</label>
+                                <input type="text" id="bound" className="form-control"
+                                    onChange={(e) => (setBound(e.target.value))}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="upload-multi">Chọn File</label>
+                                <input type="file" name="" id="upload-multi" className="form-control"
+                                    multiple
+                                    onChange={onChangeFile}
+                                />
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="button" onClick={uploadImageAsync} className="btn btn-primary btn-primary-color" data-bs-dismiss="modal">Xem</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* upload */}
             <FullPageLoading isLoading={loading} />
         </MainLayout>
     )

@@ -66,18 +66,16 @@ const dataFake = [
         "average_accuracy": 0.4814090132713318
     }
 ]
-type Props = {
-    onOpenDashboard: () => void
-}
-const ModalChartBar = (props: Props) => {
-    const { onOpenDashboard } = props;
+
+const ModalChartBar = (props) => {
+    const { onOpenDashboard, dataChart } = props;
 
     return (
         <div className="map-dashboard">
             <button className="close-btn" onClick={onOpenDashboard}>&times;</button>
-            {dataFake.map((it, index) => {
+            {dataChart.map((it, index) => {
                 const accuracy = it.object_predict.map(it => {
-                    return it.accuracy * 100
+                    return (it.accuracy * 100).toFixed(0)
                 })
                 const label = it.object_predict.map(it => {
                     return it.label
@@ -87,10 +85,11 @@ const ModalChartBar = (props: Props) => {
                         <div>
                             <div className='label-chart'>
                                 <div>{it.file_name}</div>
-                                <span>Số lượng điểm rác thải {it.object_predict?.length}</span>
+                                <span>Số lượng điểm rác thải {it.object_predict?.length} ; </span>
+                                <span>Độ chính xác trung bình {(it.average_accuracy * 100).toFixed(0)}%</span>
                             </div>
                             <ChartBar
-                                label={`Độ chính xác trung bình: ${(it.average_accuracy * 100).toFixed(0)}% `}
+                                label={` Độ chính xác (%) `}
                                 dataLabel={label}
                                 dataAccurate={accuracy}
                             />

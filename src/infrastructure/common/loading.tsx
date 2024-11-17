@@ -11,7 +11,7 @@ type Props = {
 }
 
 export const FullPageLoading = (props: Props) => {
-    const { isLoading} = props;
+    const { isLoading } = props;
     return (
         <>
             {isLoading === true ? (
@@ -34,7 +34,7 @@ export const LoadingRegion = (props: Props) => {
         <>
             <Spin
                 tip={tip}
-                // size={size}
+                size={'large'}
                 style={{ color: color }}
                 indicator={<LoadingOutlined spin />}
             />

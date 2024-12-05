@@ -1,16 +1,38 @@
 import React from "react";
 import "../../assets/css/page/MainLayout.css";
-
+import { useLocation } from "react-router-dom";
+const menu = [
+    {
+        pathname: "/",
+        name: "Bản đồ"
+    },
+    {
+        pathname: "/file",
+        name: "Tệp"
+    },
+]
 const MenuHeader = () => {
+    const { pathname } = useLocation();
+    console.log("pathname", pathname);
+
     return (
         <header className="header">
             <nav className="nav">
-                <a href="#home" className="nav-link">Home</a>
-                <a href="#about" className="nav-link">About</a>
-                <a href="#services" className="nav-link">Services</a>
-                <a href="#contact" className="nav-link">Contact</a>
+                {
+                    menu.map((item, index) => {
+                        return (
+                            <a key={index}
+                                href={item.pathname}
+                                className={`${pathname == item.pathname ? "active" : ""} nav-link`} >
+                                <div>
+                                    {item.name}
+                                </div>
+                            </a>
+                        )
+                    })
+                }
             </nav>
-        </header>
+        </header >
     );
 };
 

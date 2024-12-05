@@ -139,3 +139,49 @@
         padding: 20px 20px;
     }
 } */
+
+/* Header.css */
+.header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    background-color: #004466;
+    color: white;
+    border-top: 1px solid;
+    margin-top: 8px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.nav {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: #FFD700;
+}
+
+.btn-login {
+    background-color: #fff;
+    color: #4CAF50;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: #ddd;
+}

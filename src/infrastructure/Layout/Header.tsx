@@ -1,5 +1,6 @@
 import React from 'react'
 import "../../assets/css/style.css"
+import MenuHeader from './Menu'
 const HeaderClient = () => {
     return (
         <div>
@@ -17,6 +18,7 @@ const HeaderClient = () => {
                     <div className="header-title">Nghiên cứu hệ thống nhận dạng và giám sát rác thải nhựa trên mặt vùng ven biển Việt nam từ dữ liệu Địa tin học.</div>
                     <div className="header-info">Cơ quan chủ trì: Viện KHCN Cơ khí, Tự động hóa và Môi trường</div>
                 </div>
+                <MenuHeader />
             </header>
 
         </div>

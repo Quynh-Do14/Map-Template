@@ -68,6 +68,12 @@ const DSSTYLEBANDO = [
     },
 ];
 
+const getBase64 = (img, callback) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => callback(reader.result));
+    reader.readAsDataURL(img);
+};
+
 const MapPage = () => {
     const baseURL = process.env.REACT_APP_BASE_URL;
     const aiURL = process.env.REACT_APP_AI_URL;
@@ -83,6 +89,10 @@ const MapPage = () => {
     const [endDate1, setEndDate1] = useState("");
     const [dataChart, setDataChart] = useState([]);
     const [dataFile, setDataFile] = useState({});
+    const [dataFileImage, setDataFileImage] = useState({});
+    const [imageBase64, setImageBase64] = useState();
+
+
     const [bound, setBound] = useState('');
     const [imgRac, setImgRac] = useState('');
     const [boundInput, setBoundInput] = useState({
@@ -348,6 +358,16 @@ const MapPage = () => {
         setDataFile(file.target);
     }
 
+    const onChangeFileImage = (file) => {
+        const base = file.target.files[0];
+        if (base) {
+            getBase64(base, (url) => {
+                setImageBase64(url)
+                setDataFileImage(base);
+            });
+        }
+    }
+
     const uploadImageAsync = async () => {
         if (boundInput.xMins !== "" && boundInput.xMaxs !== "" && boundInput.yMins !== "" && boundInput.yMaxs !== "") {
             const files = dataFile.files;
@@ -375,11 +395,11 @@ const MapPage = () => {
                     if (map.getSource("racthai")) {
                         map.removeSource("racthai");
                     }
-                    setImgRac('http://13.59.112.131:8000/' + data.data.file_path);
+                    setImgRac('http://3.21.129.61:8000/' + data.data.file_path);
 
                     map.addSource('racthai', {
                         'type': 'image',
-                        'url': 'http://13.59.112.131:8000/' + data.data.file_path,
+                        'url': 'http://3.21.129.61:8000/' + data.data.file_path,
                         'coordinates': JSON.parse(bound)
                     });
                     map.addLayer({
@@ -407,6 +427,32 @@ const MapPage = () => {
         }
     }
 
+    const onShowImage = () => {
+        setDataChart([]);
+        if (map.getLayer("racthai")) {
+            map.removeLayer("racthai");
+        }
+        if (map.getSource("racthai")) {
+            map.removeSource("racthai");
+        }
+        map.addSource('racthai', {
+            'type': 'image',
+            'url': imageBase64,
+            'coordinates': JSON.parse(bound)
+        });
+        map.addLayer({
+            id: 'racthai',
+            'type': 'raster',
+            'source': 'racthai',
+            'paint': {
+                'raster-fade-duration': 0
+            }
+        });
+        map.fitBounds([JSON.parse(bound)[3], JSON.parse(bound)[1]], {
+            padding: 40
+        });
+        setLoading(false)
+    }
     useEffect(() => {
         const result = [
             [parseFloat(boundInput.xMins), parseFloat(boundInput.yMaxs)],
@@ -428,7 +474,9 @@ const MapPage = () => {
                     <button className="map-button" data-bs-toggle="modal" data-bs-target="#exampleModalUpload">
                         <i className="fa fa-cloud-upload"></i>
                     </button>
-
+                    <button className="map-button" data-bs-toggle="modal" data-bs-target="#exampleModalUploadImage">
+                        <i className="fa fa-file-image-o"></i>
+                    </button>
                     {/* <label htmlFor="upload-multi" className="map-button">
                         <input type="file" name="" id="upload-multi"
                             multiple
@@ -897,6 +945,59 @@ const MapPage = () => {
                 </div>
             </div>
             {/* upload */}
+
+            {/* upload Image */}
+            <div className="modal fade" id="exampleModalUploadImage" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Xem ảnh trên bản đồ</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="row">
+                                <div className="form-group col-6">
+                                    <label htmlFor="bound-x-min">Nhập X Min</label>
+                                    <input type="text" id="bound-x-min" className="form-control"
+                                        onChange={(e) => (setBoundInput({ ...boundInput, xMins: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="form-group col-6">
+                                    <label htmlFor="bound-x-max">Nhập X Max</label>
+                                    <input type="text" id="bound-x-max" className="form-control"
+                                        onChange={(e) => (setBoundInput({ ...boundInput, xMaxs: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="form-group col-6">
+                                    <label htmlFor="bound-y-min">Nhập Y Min</label>
+                                    <input type="text" id="bound-y-min" className="form-control"
+                                        onChange={(e) => (setBoundInput({ ...boundInput, yMins: e.target.value }))}
+                                    />
+                                </div>
+                                <div className="form-group col-6">
+                                    <label htmlFor="bound-y-max">Nhập Y Max</label>
+                                    <input type="text" id="bound-y-max" className="form-control"
+                                        onChange={(e) => (setBoundInput({ ...boundInput, yMaxs: e.target.value }))}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="upload-multi">Chọn File</label>
+                                <input type="file" name="" id="upload-multi" className="form-control"
+                                    multiple
+                                    onChange={onChangeFileImage}
+                                />
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="button" onClick={onShowImage} className="btn btn-primary btn-primary-color" data-bs-dismiss="modal">Xem</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* upload Image */}
             <FullPageLoading isLoading={loading} />
         </MainLayout>
     )

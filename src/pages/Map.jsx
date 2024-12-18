@@ -395,11 +395,11 @@ const MapPage = () => {
                     if (map.getSource("racthai")) {
                         map.removeSource("racthai");
                     }
-                    setImgRac('http://3.21.129.61:8000/' + data.data.file_path);
+                    setImgRac('http://3.18.107.109:8000/' + data.data.file_path);
 
                     map.addSource('racthai', {
                         'type': 'image',
-                        'url': 'http://3.21.129.61:8000/' + data.data.file_path,
+                        'url': 'http://3.18.107.109:8000/' + data.data.file_path,
                         'coordinates': JSON.parse(bound)
                     });
                     map.addLayer({
